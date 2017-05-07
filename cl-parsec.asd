@@ -7,6 +7,6 @@
   :source-path "src"
   :components ((:file "package")
                (:file "utils")
-               (:file "parsec")
+               (:file "prim")
                (:file "combinators")
-               (:file "primitive")))
+               (:file "char")))
