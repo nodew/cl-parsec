@@ -1,6 +1,7 @@
 (in-package :cl-parsec)
 
-(defun result (value)
+;; basic parsers
+(defun id (value)
   (lambda (input)
     (list (cons value input))))
 
