@@ -1,11 +1,6 @@
 (in-package :cl-parsec)
 
 ;; Parser a = Parser { String -> [(a, String)]
-;; (defun parser (a)
-;;   (lambda (string)
-;;     ...
-;;     (a string)))
-
 
 (defun unit (a)
   "unit :: a -> Parser a"
@@ -17,7 +12,6 @@
   (let ((c (get-first s))
         (cs (get-rest s)))
     (values c cs)))
-
 
 (defun bind (p f)
   "bind :: Parser a -> (a -> Parser b) -> Parser b"
@@ -38,19 +32,37 @@
                         pb))
            s)))
 
-
 (defmacro mdo (binds &body body)
   "(>= ma (lambda (a)
              (>= mb (lambda (b)
-                       (...)))))"
+                       (...)))))
+   which look like
+   (mdo (bind-value monad-a)
+        (_ monad-b))
+     (...)"
   (if (null binds)
-      `(funcall #'(lambda () ,@body))
+      `(unit (progn ,@body))
       (let* ((bind (car binds))
              (rest (cdr binds))
              (var (car bind))
              (m (cadr bind)))
-        (format t "~a ~a ~a" m var bind)
         (if (eql var '_)
             `(>> ,m (mdo ,rest ,@body))
             `(>>= ,m #'(lambda (,var)
                          (mdo ,rest ,@body)))))))
+
+(defun many (p)
+  "many :: Parser a -> Parser [a]"
+  #'(lambda (s)
+      (catch 'end
+        (multiple-value-bind (v rest) (parse p s)
+          (if (null v)
+              (throw 'end (values nil s))
+              (multiple-value-bind (v1 rest1) (parse (many p) rest)
+                (values (cons v1 v) rest1)))))))
+
+(defun skip-many (p)
+  (lambda (s)
+    (multiple-value-bind (v rest) (parse p s)
+      (declare (ignore v))
+      rest)))
