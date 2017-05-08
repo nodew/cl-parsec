@@ -51,18 +51,37 @@
             `(>>= ,m #'(lambda (,var)
                          (mdo ,rest ,@body)))))))
 
+(defgeneric string+ (a b)
+  (:method ((a string) (b string))
+    (concatenate 'string a b))
+  (:method ((a character) (b string))
+    (concatenate 'string (list a) b))
+  (:method ((a string) (b character))
+    (concatenate 'string a (list b))))
+
 (defun many (p)
   "many :: Parser a -> Parser [a]"
   #'(lambda (s)
-      (catch 'end
-        (multiple-value-bind (v rest) (parse p s)
-          (if (null v)
-              (throw 'end (values nil s))
-              (multiple-value-bind (v1 rest1) (parse (many p) rest)
-                (values (cons v1 v) rest1)))))))
+      (multiple-value-bind (v rest) (parse p s)
+        (if (null v)
+            (values '() s)
+            (multiple-value-bind (v1 rest1) (parse (many p) rest)
+              (values (string+ v v1) rest1))))))
 
 (defun skip-many (p)
-  (lambda (s)
-    (multiple-value-bind (v rest) (parse p s)
+  #'(lambda (s)
+    (multiple-value-bind (v rest) (parse (many p) s)
       (declare (ignore v))
-      rest)))
+      (values nil rest))))
+
+(defun many-till (p end)
+  #'(lambda (s)
+      (multiple-value-bind (v rest) (parse end s)
+        (declare (ignore rest))
+        (if v
+            (values '() s)
+            (multiple-value-bind (v1 rest1) (parse p s)
+              (if v1
+                  (multiple-value-bind (v2 rest2) (parse (many-till p end) rest1)
+                    (values (string+ v1 v2) rest2))
+                  (error "no consume all char before end")))))))

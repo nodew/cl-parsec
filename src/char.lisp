@@ -4,7 +4,7 @@
   (>>= #'item #'(lambda (c)
                   (if (funcall test c)
                       (unit c)
-                      (unit "")))))
+                      (unit nil)))))
 
 (defun is-digit (c)
   (let ((i (char-int c)))
