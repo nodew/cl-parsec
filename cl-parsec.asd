@@ -10,6 +10,7 @@
     :module :src
     :components ((:file "package")
                  (:file "error")
+                 (:file "state")
                  (:file "utils")
                  (:file "pos")
                  (:file "prim")

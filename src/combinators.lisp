@@ -9,8 +9,8 @@
 
 (defun item (s)
   "item :: String -> (Char, String)"
-  (let ((c (get-first s))
-        (cs (get-rest s)))
+  (let ((c (get-current-char s))
+        (cs (get-next-state s)))
     (values c cs)))
 
 (defun bind (p f)

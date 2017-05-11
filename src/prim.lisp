@@ -1,17 +1,16 @@
 (in-package :cl-parsec)
 
-(defmethod get-first ((l list))
-  (car l))
+(defmacro def/parser (name args &body body)
+  "Parser a :: state -> (a, nextState)"
+  `(defun ,name ,args
+      #'(lambda () ,body)))
 
-(defmethod get-first ((s string))
-  (aref s 0))
+(defun parse (parser state)
+  "parse :: Parser a -> state -> (a, nextState)"
+  (funcall parser state))
 
-(defmethod get-rest ((l list))
-  (cdr l))
-
-(defmethod get-rest ((s string))
-  (subseq s 1))
-
-(defun parse (parser input)
-  "Parser a -> (a, string)"
-  (funcall parser input))
+(defun run-parser (parser s)
+  (let ((state (initial-parse-state s)))
+    (handler-case
+        (parse parser state)
+      ())))
