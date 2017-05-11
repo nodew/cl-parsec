@@ -8,8 +8,10 @@
   :components
   ((
     :module :src
-            :components ((:file "package")
-                         (:file "utils")
-                         (:file "prim")
-                         (:file "combinators")
-                         (:file "char")))))
+    :components ((:file "package")
+                 (:file "error")
+                 (:file "utils")
+                 (:file "pos")
+                 (:file "prim")
+                 (:file "combinators")
+                 (:file "char")))))

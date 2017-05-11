@@ -1,27 +1,37 @@
 (in-package :cl-parsec)
 
-(defclass pos ()
-  ((column :accessor get-column
-           :initform 0)
-   (line :accessor get-line
-         :initform 0)))
+(defclass source-pos ()
+  ((name :accessor get-source-name
+         :initform ""
+         :initarg :name)
+   (column :accessor get-source-column
+           :initform 0
+           :initarg :column)
+   (line :accessor get-source-line
+         :initform 0
+         :initarg :line)))
 
-(defparameter *pos* (make-instance 'pos))
+(defun new-pos (name column line)
+  (make-instance 'source-pos :name name
+                             :column column
+                             :line line))
+(defun initial-pos (name)
+  (new-pos name 1 1))
 
-(defun get-position ()
-  (values (get-column *pos*) (get-line *pos*)))
+(defmethod inc-source-column ((p source-pos) (n number))
+  (let ((name (get-source-name p))
+        (col (get-source-column p))
+        (line (get-source-line p)))
+    (new-pos name (+ col n) line)))
 
-(defun update-position (&key column line)
-  (progn
-    (if (numberp column)
-        (setf (get-column *pos*) column))
-    (if (numberp line)
-        (setf (get-line *pos*) line))))
 
-(defun update-line ()
-  (let ((l (get-line *pos*)))
-    (update-position :column 0 :line (1+ l))))
+(defmethod inc-source-line ((p source-pos) (n number))
+  (let ((name (get-source-name p))
+        (col (get-source-column p))
+        (line (get-source-line p)))
+    (new-pos name col (+ line n))))
 
-(defun update-column ()
-  (let ((col (get-column *pos*)))
-    (update-position :column (1+ col))))
+(defmethod update-source-pos ((p source-pos) (c character))
+  (case c (#\newline (inc-source-line p 1))
+        (#\tab (inc-source-column p 8))
+        (otherwise (inc-source-column p 1))))
