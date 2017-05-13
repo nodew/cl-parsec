@@ -1,14 +1,17 @@
 (in-package :cl-parsec)
 
-;; Parser a = Parser { String -> [(a, String)]
+;; Parser a = Parser { String -> [(a, State)]}
 
 (defun unit (a)
   "unit :: a -> Parser a"
   #'(lambda (s)
     (values a s)))
 
+(defun zero ()
+  (constantly nil))
+
 (defun item (s)
-  "item :: String -> (Char, String)"
+  "item :: String -> (Char, State)"
   (let ((c (get-current-char s))
         (cs (get-next-state s)))
     (values c cs)))
@@ -51,14 +54,6 @@
             `(>>= ,m #'(lambda (,var)
                          (mdo ,rest ,@body)))))))
 
-(defgeneric string+ (a b)
-  (:method ((a string) (b string))
-    (concatenate 'string a b))
-  (:method ((a character) (b string))
-    (concatenate 'string (list a) b))
-  (:method ((a string) (b character))
-    (concatenate 'string a (list b))))
-
 (defun many (p)
   "many :: Parser a -> Parser [a]"
   #'(lambda (s)
@@ -66,7 +61,7 @@
         (if (null v)
             (values '() s)
             (multiple-value-bind (v1 rest1) (parse (many p) rest)
-              (values (string+ v v1) rest1))))))
+              (values (cons v v1) rest1))))))
 
 (defun skip-many (p)
   #'(lambda (s)
@@ -83,5 +78,5 @@
             (multiple-value-bind (v1 rest1) (parse p s)
               (if v1
                   (multiple-value-bind (v2 rest2) (parse (many-till p end) rest1)
-                    (values (string+ v1 v2) rest2))
-                  (error "no consume all char before end")))))))
+                    (values (cons v1 v2) rest2))
+                  (error 'many-unconsumed)))))))

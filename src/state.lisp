@@ -30,7 +30,7 @@
 (defun initial-parse-state (s)
   (new-parse-state (new-parse-stream s) (initial-pos "") 0))
 
-(defmethod get-current-char (state parse-state)
+(defmethod get-current-char ((state parse-state))
   (let* ((ps (get-parse-stream state))
          (index (get-parse-index state))
          (pos (get-source-pos state))
@@ -40,7 +40,7 @@
         (error 'eof-error :pos pos)
         (aref pss index))))
 
-(defmethod get-next-state (oldstate parse-state)
+(defmethod get-next-state ((oldstate parse-state))
   (let* ((ps (get-parse-stream oldstate))
          (index (get-parse-index oldstate))
          (pos (get-source-pos oldstate))

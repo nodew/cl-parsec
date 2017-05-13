@@ -2,9 +2,9 @@
 
 (define-condition parsec-error (error)
   ((pos :initarg :pos
-        :reader parse-error-pos)
+        :reader parsec-error-pos)
    (msg :initarg :msg
-        :reader parse-error-msg)))
+        :reader parsec-error-msg)))
 
 (define-condition eof-error (parsec-error) ())
 
@@ -25,3 +25,8 @@
           :reader do-not-satisfy-token)
    (test :initarg :test
          :reader do-not-satisfy-test)))
+
+(defmethod print-object ((err parsec-error) s)
+  (format s "parse error at: ~a, ~a~%"
+          (parsec-error-pos err)
+          (parsec-error-msg err)))

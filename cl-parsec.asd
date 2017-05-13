@@ -5,10 +5,12 @@
   :description "cl-parsec, a parser-combinator"
   :author "Joe Wang"
   :licence "MIT"
+  :depends-on (#:cl-unicode)
   :components
   ((
     :module :src
     :components ((:file "package")
+                 (:file "unicode")
                  (:file "error")
                  (:file "state")
                  (:file "utils")
